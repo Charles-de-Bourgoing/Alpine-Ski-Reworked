@@ -2,7 +2,7 @@ from ursina import *
 
 
 from direct.stdpy import thread # we need threading to load entities in the background (this is specific to ursina, standard threading wouldn't work)
-
+from UI import *
 
 
     
@@ -18,15 +18,13 @@ def loadLevel():
     
     destroy(loading_screen) # delete the loading screen when finished
 
-def showLoadingScreen():    
-    global loading_screen,play
-    destroy(play) # delete the play button when clicked
-    loading_screen = Entity(model='quad', texture='loading_image')
-    thread.start_new_thread(function=loadLevel, args=()) # load entities in the background
+
 
 def showMenu():
-    global play
-    play = Button('Play', on_click=showLoadingScreen) # A play button that show the loading menu when clicked
+    MenuManager()
+    
+
+
 # Source - https://stackoverflow.com/a/65962467
 # Posted by cr8f2kvi9b7gqpf1, modified by community. See post 'Timeline' for change history
 # Retrieved 2026-07-19, License - CC BY-SA 4.0

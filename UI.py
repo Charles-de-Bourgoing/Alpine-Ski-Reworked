@@ -8,6 +8,7 @@ class MenuManager:
         self.play_button = Button('Play', on_click=self.show_loading_screen)
         self.loading_screen = None
 
+
     def show_loading_screen(self):
         destroy(self.play_button)
         self.loading_screen = Entity(model='quad', texture='loading_image')
@@ -20,3 +21,4 @@ class MenuManager:
         player = Player()
         
         destroy(self.loading_screen)
+

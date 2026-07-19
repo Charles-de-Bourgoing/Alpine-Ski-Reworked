@@ -9,7 +9,7 @@ class Player(Entity):
             **kwargs
         )
         self.player_model = Entity(model='player', parent=self)
-        self.controls = {'left': 'q', 'right': 'd'} # Configuration AZERTY
+        self.controls = {'left': 'a', 'right': 'd'} # Configuration QWERTY -> AZERTY
 
     def update(self):
         # Logique de déplacement propre au joueur

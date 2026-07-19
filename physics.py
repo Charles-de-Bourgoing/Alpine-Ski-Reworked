@@ -1,0 +1,3 @@
+# physics.py 
+
+# définit l'accélération, gère les collisions...

@@ -22,6 +22,7 @@ class MenuManager:
         global level, cam, P1, gun, editor_camera
         level = Level()
         cam = FirstPersonController()
+        #cam.input_axis = 'wasd'
         camera.position = (0, 3, -10)  # recule la caméra en arrière et en hauteur
         P1 = Player(cam)                # plus besoin de z=-10 ici
         gun = Entity(model='cube', parent=cam, position=(.5,-.25,.25), scale=(.3,.2,1), origin_z=-.5, color=color.red, on_cooldown=False)

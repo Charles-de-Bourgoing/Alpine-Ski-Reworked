@@ -29,12 +29,30 @@ input = pause_input
 
 if __name__ == '__main__':
     app = Ursina()
+    # Alias clavier AZERTY -> WASD (FirstPersonController lit w/a/s/d en interne)
+    #keys_bind = {'z': 'w', 'q': 'a', 's': 's', 'd': 'd'}
+    #for p in keys_bind.items():
+    #    input_handler.rebind(p[0], p[1])
+    #def input(key):
+    #    # Alias AZERTY -> QWERTY pour FirstPersonController (qui lit 'w'/'a' en dur)
+    #    if key == 'z':
+    #        held_keys['w'] = 1
+    #    elif key == 'z up':
+    #        held_keys['w'] = 0
+    #    elif key == 'q':
+    #        held_keys['a'] = 1
+    #    elif key == 'q up':
+    #        held_keys['a'] = 0
+
     random.seed(0)
     Entity.default_shader = lit_with_shadows_shader
 
     showMenu()
     
-    
+    #def update():
+    #    held_keys['w'] = held_keys['z']
+    #    held_keys['a'] = held_keys['q']
+    # 's' et 'd' sont déjà identiques en AZERTY/QWERTY
   
     app.run()
 

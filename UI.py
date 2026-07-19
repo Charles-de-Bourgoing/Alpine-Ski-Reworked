@@ -2,7 +2,7 @@ from ursina import *
 from ursina.prefabs.first_person_controller import FirstPersonController
 from direct.stdpy import thread
 from player import Player
-from monde import Level
+from monde import *
 global P1, gun, cam, editor_camera
 
 class MenuManager:
@@ -21,10 +21,12 @@ class MenuManager:
         # Instanciation des modules externes
         global level, cam, P1, gun, editor_camera
         level = Level()
+        
         cam = FirstPersonController()
         #cam.input_axis = 'wasd'
         camera.position = (0, 3, -10)  # recule la caméra en arrière et en hauteur
         P1 = Player(cam)                # plus besoin de z=-10 ici
+        WManager = WorldManager(P1)
         gun = Entity(model='cube', parent=cam, position=(.5,-.25,.25), scale=(.3,.2,1), origin_z=-.5, color=color.red, on_cooldown=False)
         gun.muzzle_flash = Entity(parent=gun, z=1, world_scale=.5, model='quad', color=color.yellow, enabled=False)
         editor_camera = EditorCamera(enabled=False, ignore_paused=True)

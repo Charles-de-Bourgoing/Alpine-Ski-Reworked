@@ -36,12 +36,13 @@ class SkiPhysics:
 
 
         if ray_hit.hit:
-            # Repoussement au-dessus du sol (évite de s'enfoncer)
+            #print("normale: " + str(ray_hit.world_normal))
             ground_y = ray_hit.world_point.y
 
             # Si le joueur touche ou passe sous le sol
             if player.y <= ground_y:
-                print("player sous sol" + str(player.y) + " ground: " + str(ground_y))
+                #print("player sous sol" + str(player.y) + " ground: " + str(ground_y))
+                # Repoussement au-dessus du sol (évite de s'enfoncer)
                 player.y = ground_y
                 
                 # Conversion de la vitesse verticale en glisse selon la normale

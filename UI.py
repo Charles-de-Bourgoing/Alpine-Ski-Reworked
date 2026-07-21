@@ -26,7 +26,7 @@ class MenuManager:
 # Instancié une seule fois à l'import de UI.py
 pos_display = Text(
     text='',
-    position=(-0.85, 0.45), # En haut à gauche de l'écran
+    position=(0.05, 0.45), # En haut à gauche de l'écran
     scale=0.7,
     color=color.yellow
 )

@@ -45,15 +45,22 @@ class TerrainChunk(Entity):
             # Conversion en coordonnees MONDE reelles
             world_x = self.x + (v[0] * scale_x)
             world_z = self.z + (v[2] * scale_z)
-            
-            base_slope = -world_z * 0.5 
+
+            base_slope = -world_z * 0.7 
             edge_factor = 1 + (abs(world_x) * 0.05)
             bosses = self.noise([world_x * 0.05, world_z * 0.05]) * 2 * edge_factor
             v[1] = base_slope + bosses
 
         # On multiplie les coordonnées UV locales par 20 pour répéter l'image 20 fois
         mesh.uvs = [[v[0] * 20, v[2] * 20] for v in mesh.vertices]
-        
+        mesh.generate_normals()
+        for i, n in enumerate(mesh.normals):
+            # Si le produit vectoriel a inverse la normale vers le bas/cote, on la redresse
+            if n[1] < 0.2:
+                
+                mesh.normals[i] = Vec3(n[0], abs(n[1]) + 0.8, n[2]).normalized()
+                print("normale redressée: " + str(mesh.normals[i]))
+
         mesh.generate()
         self.collider = 'mesh'
 

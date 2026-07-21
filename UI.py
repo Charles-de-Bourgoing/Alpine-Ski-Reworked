@@ -23,9 +23,29 @@ class MenuManager:
         WManager = WorldManager(P1)
         destroy(self.loading_screen)
 
+# Instancié une seule fois à l'import de UI.py
+pos_display = Text(
+    text='',
+    position=(-0.85, 0.45), # En haut à gauche de l'écran
+    scale=0.7,
+    color=color.yellow
+)
+
+_player_ref = None
+
+
 # Fonction globale pour suivre le joueur avec la caméra
 def update():
-    if 'P1' in globals() and P1:
-        # Positionne la caméra derrière et au-dessus du joueur
-        camera.position = P1.position + Vec3(0, 4, -10)
-        camera.look_at(P1)
+    global _player_ref
+    
+    # Recherche paresseuse (lazy search) du Player dans la scène s'il n'est pas encore trouvé
+    if not _player_ref:
+        for entity in scene.entities:
+            if entity.__class__.__name__ == 'Player':
+                _player_ref = entity
+                break
+    
+    # Mise à jour si le joueur existe
+    if _player_ref:
+        pos = _player_ref.position
+        pos_display.text = f"X: {pos.x:.1f} | Y: {pos.y:.1f} | Z: {pos.z:.1f}"

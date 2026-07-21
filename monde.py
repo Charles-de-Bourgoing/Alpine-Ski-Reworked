@@ -25,7 +25,8 @@ class TerrainChunk(Entity):
     def __init__(self, subdivision=32, **kwargs):
         print("!!!!!!!!!!!!!!!!!!!!!!")
 
-        super().__init__(model=Plane(subdivisions=(subdivision, subdivision)),
+        super().__init__(
+                        model=Plane(subdivisions=(subdivision, subdivision)),
                           texture='snow_texture_6',
                           shader=lit_with_shadows_shader,
                             **kwargs)
@@ -37,18 +38,24 @@ class TerrainChunk(Entity):
         
     def generate_relief(self):
         mesh = self.model
+        scale_x, scale_z = self.scale_x, self.scale_z
+
         for v in mesh.vertices:
-            global_x = v[0] + self.x
-            global_z = v[2] + self.z
-            base_slope = -global_z * 0.1 
-            edge_factor = abs(global_x) * 0.5
-            bosses = self.noise([global_x * 0.1, global_z * 0.1]) * edge_factor
+
+            # Conversion en coordonnees MONDE reelles
+            world_x = self.x + (v[0] * scale_x)
+            world_z = self.z + (v[2] * scale_z)
+            
+            base_slope = -world_z * 0.5 
+            edge_factor = 1 + (abs(world_x) * 0.05)
+            bosses = self.noise([world_x * 0.05, world_z * 0.05]) * 2 * edge_factor
             v[1] = base_slope + bosses
 
         # On multiplie les coordonnées UV locales par 20 pour répéter l'image 20 fois
         mesh.uvs = [[v[0] * 20, v[2] * 20] for v in mesh.vertices]
         
         mesh.generate()
+        self.collider = 'mesh'
 
 class WorldManager(Entity):
     def __init__(self, player_entity, **kwargs):
@@ -60,9 +67,9 @@ class WorldManager(Entity):
         
         # Initialisation des premiers chunks
         self.chunks = [
-            TerrainChunk(scale=self.taille_chunk, z=0),
-            TerrainChunk(scale=self.taille_chunk, z=-self.taille_chunk),
-            TerrainChunk(scale=self.taille_chunk, z=-self.taille_chunk * 2)
+            TerrainChunk(scale=(self.taille_chunk, 1, self.taille_chunk), z=0),
+            TerrainChunk(scale=(self.taille_chunk, 1, self.taille_chunk), z=-self.taille_chunk),
+            TerrainChunk(scale=(self.taille_chunk, 1, self.taille_chunk), z=-self.taille_chunk * 2)
         ]
 
     def update(self):
@@ -74,10 +81,11 @@ class WorldManager(Entity):
         
         # Logique de recyclage
         for chunk in self.chunks:
-            # Si le joueur a dépassé le milieu de ce chunk en descendant (axe Z négatif)
-            if self.player.z < chunk.z - self.taille_chunk:
+            # Si le joueur a dépassé ce chunk en descendant (axe Z négatif)
+            if self.player.z < chunk.z - self.taille_chunk*0.75:
                 # On le déplace commercialement devant le chunk le plus éloigné
                 plus_loin_z = min(c.z for c in self.chunks)
                 chunk.z = plus_loin_z - self.taille_chunk
                 # Régénération du relief pour la nouvelle position
                 chunk.generate_relief()
+                chunk.collider = 'mesh' # Re-générer la collision !

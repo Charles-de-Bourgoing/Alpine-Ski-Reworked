@@ -19,6 +19,13 @@ class Player(Entity):
         #self.velocity_y = 0
         self.controls = {'left': 'q', 'right': 'd', 'forward': 'z', 'back': 's', 'jump': 'space'}
 
+        def snap_to_ground(self):
+            # Raycast vers le bas depuis une hauteur sûre (ex: Y=100)
+            ray = raycast(self.world_position + Vec3(0, 100, 0), Vec3(0, -1, 0), distance=200)
+            if ray.hit:
+                self.y = ray.world_point.y + 0.5 # Mettre le pivot légèrement au-dessus
+
+        snap_to_ground(self)  # Appel initial pour positionner le joueur sur le sol
         camera.parent = self            # La caméra suit le joueur et pivote avec lui
         camera.position = (0, 4, -10)   # Offset relatif : 4m au-dessus, 10m derrière le pivot
         camera.rotation = (15, 0, 0)    # Incline la caméra de 15° vers le bas

@@ -26,7 +26,7 @@ class MenuManager:
 # Instancié une seule fois à l'import de UI.py
 pos_display = Text(
     text='',
-    position=(0.05, 0.45), # En haut à gauche de l'écran
+    position=(-0.5, 0.45), # En haut à gauche de l'écran
     scale=0.7,
     color=color.yellow
 )
@@ -48,4 +48,5 @@ def update():
     # Mise à jour si le joueur existe
     if _player_ref:
         pos = _player_ref.position
-        pos_display.text = f"X: {pos.x:.1f} | Y: {pos.y:.1f} | Z: {pos.z:.1f}"
+        suspension_height = _player_ref.physics.current_height if hasattr(_player_ref.physics, 'current_height') else -1
+        pos_display.text = f"X: {pos.x:.1f} | Y: {pos.y:.1f} | Z: {pos.z:.1f} | Suspension: {suspension_height:.2f}"

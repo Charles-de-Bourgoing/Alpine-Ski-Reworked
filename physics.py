@@ -67,7 +67,7 @@ class SkiPhysics:
                 v_right_mag = self.velocity.dot(right_on_slope)
 
                 # 5. Amortissement pur du dérapage latéral sans altérer la vitesse avant
-                v_right_mag = lerp(v_right_mag, 0.0, 4 * time.dt)
+                v_right_mag = lerp(v_right_mag, 0.0, 3 * time.dt)
 
                 # 6. Reconstruction exacte sans création d'énergie parasite
                 self.velocity = (forward_on_slope * v_forward_mag) + (right_on_slope * v_right_mag)

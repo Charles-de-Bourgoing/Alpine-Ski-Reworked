@@ -27,44 +27,39 @@ class SkiPhysics:
 
         # 2. Accélération de la pente 
         forward_dir = player.forward
-        self.velocity += forward_dir * self.acceleration * time.dt
-
-        # 3. Alignement de l'inertie vers l'avant des skis (friction latérale)
-        current_speed = self.velocity.length()
-        self.velocity = lerp(self.velocity, forward_dir * current_speed, 5 * time.dt)
-
-
-
         if ray_hit.hit:
-            #print("normale: " + str(ray_hit.world_normal))
             ground_y = ray_hit.world_point.y
 
-            # Si le joueur touche ou passe sous le sol
-            if player.y <= ground_y:
-                #print("player sous sol" + str(player.y) + " ground: " + str(ground_y))
-                # Repoussement au-dessus du sol (évite de s'enfoncer)
+            if player.y <= ground_y + 0.05:
                 player.y = ground_y
                 
-                # Conversion de la vitesse verticale en glisse selon la normale
                 normal = ray_hit.world_normal
+                
+                # 1. Projection de la gravite (0, -gravity, 0) sur le plan de la pente
+                # Donnee par : g_proj = g - (g . n) * n
+                gravity_vec = Vec3(0, -self.gravity, 0)
+                slope_acceleration = gravity_vec - normal * gravity_vec.dot(normal)
+                
+                # Accélération réelle tirée par la pente
+                self.velocity += slope_acceleration * time.dt
+
+                # 2. Projection de la vitesse existante sur le plan de la pente
                 if self.velocity.y < 0:
-                    # Projection du vecteur vitesse sur le plan du sol
                     self.velocity -= normal * self.velocity.dot(normal)
 
-                # Accélération due à la pente
-                slope_pull = Vec3(normal.x, 0, normal.z) * self.gravity
-                self.velocity += slope_pull * time.dt
+                # 3. Alignement de la vitesse le long de l'axe des skis (friction latérale)
+                current_speed = self.velocity.length()
+                self.velocity = lerp(self.velocity, forward_dir * current_speed, 5 * time.dt)
 
+                # 4. Friction de la neige
+                self.velocity.x *= self.friction_snow
+                self.velocity.z *= self.friction_snow
+            else:
+                # En l'air : gravite standard
+                self.velocity.y -= self.gravity * time.dt
+        else:
+            # En l'air : gravite standard
+            self.velocity.y -= self.gravity * time.dt
 
-
-
-        #else:
-            # En l'air : chute libre
-            #self.velocity.y -= self.gravity * time.dt
-        # 4. Inertie / Friction : la vitesse s'aligne progressivement sur l'orientation des skis
-        self.velocity.y -= self.gravity * time.dt
-        
-        self.velocity.x *= self.friction_snow
-        self.velocity.z *= self.friction_snow
-        # 6. Application du mouvement
+        # Application du mouvement
         player.position += self.velocity * time.dt

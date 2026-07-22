@@ -9,9 +9,9 @@ class SkiPhysics:
     def __init__(self):
         self.velocity = Vec3(0, 0, 0)
         self.gravity = 9.81
-        self.friction_snow = 0.98   # Coefficient de glisse (proche de 1 = glisse fort)
+        self.friction_snow = 0.99   # Coefficient de glisse (proche de 1 = glisse fort)
         self.turn_speed = 100        # Vitesse de rotation en degrés/sec
-        self.acceleration = 12      # Poussée de la pente vers le bas
+        self.acceleration = 30      # Poussée de la pente vers le bas
 
     def apply_physics(self, player, ray_hit, keys):
         
@@ -25,7 +25,7 @@ class SkiPhysics:
 
         
 
-        # 2. Accélération de la pente (pousse toujours vers l'axe -Z)
+        # 2. Accélération de la pente 
         forward_dir = player.forward
         self.velocity += forward_dir * self.acceleration * time.dt
 

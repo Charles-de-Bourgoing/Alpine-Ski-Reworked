@@ -22,47 +22,82 @@ class Level(Entity):
 from ursina.shaders import lit_with_shadows_shader # Import du shader
 
 class TerrainChunk(Entity):
-    def __init__(self, subdivision=32, **kwargs):
+    def __init__(self, size=100, subdivision=32, **kwargs):
         print("!!!!!!!!!!!!!!!!!!!!!!")
+        self.size = size
+        self.subdivision = subdivision
+        self.noise=PerlinNoise(octaves=4, seed=1)
+        
+
 
         super().__init__(
-                        model=Plane(subdivisions=(subdivision, subdivision)),
                           texture='snow_texture_6',
+                          color = Vec4(230/255, 245/255, 255/255, 1.0),
+                          scale=(1,1,1),
                           shader=lit_with_shadows_shader,
                             **kwargs)
         #texture='noise',
-        self.color = Vec4(230/255, 245/255, 255/255, 1.0)
-        self.noise = PerlinNoise(octaves=4, seed=1)
-        self.generate_relief()
+
+        custom_mesh=self.generate_mesh()
+
+
+
 
         
-    def generate_relief(self):
-        mesh = self.model
-        scale_x, scale_z = self.scale_x, self.scale_z
+    def generate_mesh(self):
+        vertices = []
+        triangles = []
+        uvs = []
 
-        for v in mesh.vertices:
+        sub = self.subdivision
+        step = self.size / sub
+        #mesh = self.model
+        #scale_x, scale_z = self.scale_x, self.scale_z
 
-            # Conversion en coordonnees MONDE reelles
-            world_x = self.x + (v[0] * scale_x)
-            world_z = self.z + (v[2] * scale_z)
 
-            base_slope = -world_z * 0.7 
-            edge_factor = 1 + (abs(world_x) * 0.05)
-            bosses = self.noise([world_x * 0.05, world_z * 0.05]) * 2 * edge_factor
-            v[1] = base_slope + bosses
+        # Generation des sommets en coordonnees reelles (de -size/2 a +size/2)
+        for z_idx in range(sub + 1):
+            for x_idx in range(sub + 1):
+                # Coordonnees locales egales aux coordonnees monde
+                local_x = (x_idx * step) - (self.size / 2)
+                local_z = (z_idx * step) - (self.size / 2)
+                world_x = self.x + local_x
+                world_z = self.z + local_z
 
-        # On multiplie les coordonnées UV locales par 20 pour répéter l'image 20 fois
-        mesh.uvs = [[v[0] * 20, v[2] * 20] for v in mesh.vertices]
-        mesh.generate_normals()
-        for i, n in enumerate(mesh.normals):
-            # Si le produit vectoriel a inverse la normale vers le bas/cote, on la redresse
-            if n[1] < 0.2:
-                
-                mesh.normals[i] = Vec3(n[0], abs(n[1]) + 0.8, n[2]).normalized()
-                print("normale redressée: " + str(mesh.normals[i]))
+                # Calcul du relief
+                base_slope = -world_z * 0.7
+                edge_factor = 1 + (abs(world_x) * 0.05)
+                bosses = self.noise([world_x * 0.05, world_z * 0.05]) * 2 * edge_factor
+                height = base_slope + bosses
 
-        mesh.generate()
-        self.collider = 'mesh'
+                vertices.append(Vec3(local_x, height, local_z))
+                uvs.append((x_idx / sub * 10, z_idx / sub * 10))
+
+
+        # Construction des triangles (ordre CCW pour normales orientees vers le haut)
+        for z_idx in range(sub):
+            for x_idx in range(sub):
+                i = z_idx * (sub + 1) + x_idx
+                # Triangle 1
+                triangles.append((i, i + sub + 1, i + 1))
+                # Triangle 2
+                triangles.append((i + 1, i + sub + 1, i + sub + 2))
+
+        # 3. Assemblage du Mesh Ursina
+        m = Mesh(
+            vertices=vertices,
+            triangles=triangles,
+            uvs=uvs,
+            mode='triangle'
+        )
+
+ 
+        m.generate_normals()
+        m.generate()
+        self.model = m
+        self.double_sided = True
+        self.collider = None
+        self.collider = MeshCollider(self, mesh=m)  # Re-générer le collider avec le nouveau maillage
 
 class WorldManager(Entity):
     def __init__(self, player_entity, **kwargs):
@@ -74,9 +109,9 @@ class WorldManager(Entity):
         
         # Initialisation des premiers chunks
         self.chunks = [
-            TerrainChunk(scale=(self.taille_chunk, 1, self.taille_chunk), z=0),
-            TerrainChunk(scale=(self.taille_chunk, 1, self.taille_chunk), z=-self.taille_chunk),
-            TerrainChunk(scale=(self.taille_chunk, 1, self.taille_chunk), z=-self.taille_chunk * 2)
+            TerrainChunk(size=self.taille_chunk, z=0),
+            TerrainChunk(size=self.taille_chunk, z=-self.taille_chunk),
+            TerrainChunk(size=self.taille_chunk, z=-self.taille_chunk * 2)
         ]
 
     def update(self):
@@ -94,5 +129,5 @@ class WorldManager(Entity):
                 plus_loin_z = min(c.z for c in self.chunks)
                 chunk.z = plus_loin_z - self.taille_chunk
                 # Régénération du relief pour la nouvelle position
-                chunk.generate_relief()
+                chunk.generate_mesh()
                 chunk.collider = 'mesh' # Re-générer la collision !

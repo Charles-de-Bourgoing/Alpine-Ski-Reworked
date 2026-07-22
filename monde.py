@@ -39,6 +39,7 @@ class TerrainChunk(Entity):
         #texture='noise',
 
         custom_mesh=self.generate_mesh()
+        self.collider = 'mesh'
 
 
 
@@ -110,8 +111,8 @@ class WorldManager(Entity):
         # Initialisation des premiers chunks
         self.chunks = [
             TerrainChunk(size=self.taille_chunk, z=0),
-            TerrainChunk(size=self.taille_chunk, z=-self.taille_chunk),
-            TerrainChunk(size=self.taille_chunk, z=-self.taille_chunk * 2)
+            TerrainChunk(size=self.taille_chunk, z=self.taille_chunk),
+            TerrainChunk(size=self.taille_chunk, z=self.taille_chunk * 2)
         ]
 
     def update(self):
@@ -124,10 +125,10 @@ class WorldManager(Entity):
         # Logique de recyclage
         for chunk in self.chunks:
             # Si le joueur a dépassé ce chunk en descendant (axe Z négatif)
-            if self.player.z < chunk.z - self.taille_chunk*0.75:
+            if self.player.z > chunk.z + self.taille_chunk*0.5:
                 # On le déplace commercialement devant le chunk le plus éloigné
-                plus_loin_z = min(c.z for c in self.chunks)
-                chunk.z = plus_loin_z - self.taille_chunk
+                plus_loin_z = max(c.z for c in self.chunks)
+                chunk.z = plus_loin_z + self.taille_chunk
                 # Régénération du relief pour la nouvelle position
                 chunk.generate_mesh()
                 chunk.collider = 'mesh' # Re-générer la collision !

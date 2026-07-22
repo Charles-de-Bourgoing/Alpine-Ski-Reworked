@@ -27,7 +27,7 @@ class TerrainChunk(Entity):
 
         super().__init__(
                         model=Plane(subdivisions=(subdivision, subdivision)),
-                          texture='snow_texture_6',
+                          texture='textures/snow_texture_6',
                           shader=lit_with_shadows_shader,
                             **kwargs)
         #texture='noise',

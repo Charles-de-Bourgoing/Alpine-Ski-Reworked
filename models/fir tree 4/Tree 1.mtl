@@ -1,0 +1,22 @@
+# Blender 4.5.3 LTS MTL File: 'Tree 1.blend'
+# www.blender.org
+
+newmtl Leaf_Material
+Ns 0.000000
+Ka 1.000000 1.000000 1.000000
+Ks 0.559621 0.559621 0.559621
+Ke 0.000000 0.000000 0.000000
+Ni 1.400000
+d 1.000000
+illum 2
+map_Kd -o 0 0 -0.19999999 -s 1.1 0.29999992 0.79999995 C:/Users/nicol/Downloads/uploads_files_4874726_Douglas_Fir_Tree/png-transparent-green-leaves-illustration-spruce-branch-tree-green-pine-needles-christmas-decoration-new-year-twig-thumbnail.png
+
+newmtl Material
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd C:/Users/nicol/Downloads/uploads_files_4874726_Douglas_Fir_Tree/Bark Texture/Bark001_4K-JPG_Color.jpg
+map_Ns C:/Users/nicol/Downloads/uploads_files_4874726_Douglas_Fir_Tree/Bark Texture/Bark001_4K-JPG_Roughness.jpg

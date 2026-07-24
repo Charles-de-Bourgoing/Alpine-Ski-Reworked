@@ -14,6 +14,7 @@ class Sapin(Entity):
             model='models/fir tree/trunk',
             texture='models/fir tree/bark.jpg',
         )
+        self.trunk.collider = 'box'
 
         self.branches = Entity(
             parent=self,
@@ -22,6 +23,7 @@ class Sapin(Entity):
             double_sided=True,   # pour voir les aiguilles des deux côtés
             alpha=1,
         )
+        self.branches.collider = 'box'
 
 class Level(Entity):
     def __init__(self, **kwargs):
@@ -151,6 +153,7 @@ class WorldManager(Entity):
             TerrainChunk(size=self.taille_chunk, z=self.taille_chunk),
             TerrainChunk(size=self.taille_chunk, z=self.taille_chunk * 2)
         ]
+        self.player.WM = self  # Associe le WorldManager au joueur
 
     def update(self):
         # Temporisateur pour ne pas check à chaque frame

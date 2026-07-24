@@ -14,9 +14,9 @@ class SkiPhysics:
         #self.acceleration = 30      # Poussée de la pente vers le bas
 
         # Paramètres de la suspension (jambes)
-        self.rest_height = 1.0       # Hauteur cible au-dessus du sol (mètres)
-        self.stiffness = 0.05       # Raideur du ressort (k) : plus élevé = plus ferme
-        self.damping = 1          # Amortissement (c) : évite le comportement "trampoline"
+        self.rest_height = 0.8       # Hauteur cible au-dessus du sol (mètres)
+        self.stiffness = 0.0005       # Raideur du ressort (k) : plus élevé = plus ferme
+        self.damping = 0.01          # Amortissement (c) : évite le comportement "trampoline"
 
         # Attributs d'état exposés pour l'UI et la télémétrie
         self.current_height = self.rest_height
@@ -51,13 +51,7 @@ class SkiPhysics:
             if self.current_height <= self.rest_height + 0.2:
                 #player.y = ground_y
 
-                # Poussée des bâtons (si l'option est activée, au sol, et touche appuyée)
-                if self.use_poles_mode and keys['space']:
-                    current_time = time.time()
-                    if current_time - self.last_pole_time >= self.pole_cooldown:
-                        # Impulsion vers l'avant selon l'axe des skis
-                        self.velocity += forward_on_slope * self.pole_push_force
-                        self.last_pole_time = current_time
+                
 
                 
                 normal = ray_hit.world_normal
@@ -73,7 +67,13 @@ class SkiPhysics:
                 # Garantit que <forward_on_slope, right_on_slope> = 0 (pas d'injection d'énergie)
                 right_on_slope = forward_on_slope.cross(normal).normalized()
                 
-
+                # Poussée des bâtons (si l'option est activée, au sol, et touche appuyée)
+                if self.use_poles_mode and keys['space']:
+                    current_time = time.time()
+                    if current_time - self.last_pole_time >= self.pole_cooldown:
+                        # Impulsion vers l'avant selon l'axe des skis
+                        self.velocity += forward_on_slope * self.pole_push_force * time.dt
+                        self.last_pole_time = current_time
 
                 # 3. Projection de la pesanteur sur la pente
                 gravity_vec = Vec3(0, -self.gravity, 0)
@@ -85,26 +85,11 @@ class SkiPhysics:
                 v_right_mag = self.velocity.dot(right_on_slope)
 
                 # 5. Amortissement pur du dérapage latéral sans altérer la vitesse avant
-                v_right_mag = lerp(v_right_mag, 0.0, 3 * time.dt)
+                v_right_mag = lerp(v_right_mag, 0.0, 5 * time.dt)
 
                 # 6. Reconstruction exacte sans création d'énergie parasite
                 self.velocity = (forward_on_slope * v_forward_mag) + (right_on_slope * v_right_mag)
                 
-
-                """# 7. Suspension (appliquée APRÈS la reconstruction pour ne pas contaminer la glisse)
-                raw_displacement = self.current_height - self.rest_height
-
-                # Bornage strict : [-0.2, +0.6] par rapport à rest_height
-                # Hauteur bloquée entre 0.4m (compression max) et 1.2m (extension max)
-                clamped_height = max(self.rest_height - 0.6, min(self.rest_height + 0.2, self.current_height))
-
-                # Réajustement de la position du joueur si on dépasse les limites physiques des jambes
-                if self.current_height != clamped_height:
-                    player.y = ground_y + clamped_height
-                    self.current_height = clamped_height
-
-                displacement = self.current_height - self.rest_height
-                self.suspension_compression = -displacement"""
 
                 # 7. Suspension : calcul dynamique de la hauteur et compression
                 displacement = self.current_height - self.rest_height  # négatif si enfoncé (< 1.0)
@@ -115,7 +100,7 @@ class SkiPhysics:
                 self.velocity.y += (spring_force + damping_force) * time.dt
 
                 # Limitation stricte de la compression physique enregistrée [-0.2, 0.6]
-                self.suspension_compression = max(-0.2, min(0.6, -displacement))
+                self.suspension_compression = max(-0.6, min(0.6, -displacement))
 
                 # Force du ressort + compensation de la gravité statique pour équilibre à 1.0m
                 spring_force = (-self.stiffness * displacement) + self.gravity

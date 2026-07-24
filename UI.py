@@ -18,19 +18,28 @@ class MenuManager:
     @staticmethod
     def setup_gameplay_ui(ski_physics):
         # Callback appelée à chaque bascule de la case
-        def toggle_poles_mode():
-            ski_physics.use_poles_mode = checkbox.value
-            ski_physics.gravity = 12.0 if checkbox.value else 25.0
-
+        
         checkbox = Checkbox(
             text=' Mode Bâtons',
-            value=False,
+            value=ski_physics.use_poles_mode,
             parent=camera.ui,
             position=(-0.7, 0.4),  # Ajuster selon votre disposition UI
             scale=0.1,
             z=-1,
         )
-        checkbox.on_value_changed = toggle_poles_mode
+        
+        def on_checkbox_click():
+            # Inversion explicite du booléen
+            ski_physics.use_poles_mode = not ski_physics.use_poles_mode
+            ski_physics.gravity = 12.0 if ski_physics.use_poles_mode else 25.0
+            
+            # Synchronisation du rendu visuel de la case
+            checkbox.value = ski_physics.use_poles_mode
+
+        
+
+
+        checkbox.on_click = on_checkbox_click
 
     def load_level(self):
         global level, P1, gun

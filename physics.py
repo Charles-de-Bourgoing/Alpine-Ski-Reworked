@@ -22,6 +22,12 @@ class SkiPhysics:
         self.current_height = self.rest_height
         self.suspension_compression = 0.0  # 0 = repos, >0 = comprimé, <0 = détendu
 
+        #Pour le mode bâtons
+        self.use_poles_mode = False
+        self.pole_push_force = 15.0  # Force d'impulsion des bâtons
+        self.pole_cooldown = 0.8     # Délai minimum entre deux coups de bâton (secondes)
+        self.last_pole_time = 0.0
+
     def apply_physics(self, player, ray_hit, keys):
         
 
@@ -44,6 +50,15 @@ class SkiPhysics:
             # On est en contact avec la suspension si on descend sous la hauteur de repos + marge
             if self.current_height <= self.rest_height + 0.2:
                 #player.y = ground_y
+
+                # Poussée des bâtons (si l'option est activée, au sol, et touche appuyée)
+                if self.use_poles_mode and keys['space']:
+                    current_time = time.time()
+                    if current_time - self.last_pole_time >= self.pole_cooldown:
+                        # Impulsion vers l'avant selon l'axe des skis
+                        self.velocity += forward_on_slope * self.pole_push_force
+                        self.last_pole_time = current_time
+
                 
                 normal = ray_hit.world_normal
 

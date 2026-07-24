@@ -18,6 +18,8 @@ class Player(Entity):
         #self.gravity = 0.5
         #self.velocity_y = 0
         self.controls = {'left': 'q', 'right': 'd', 'forward': 'z', 'back': 's', 'jump': 'space'}
+        self.WM = None
+        self.creation_date = time.time()  # Stocke le temps de création de l'entité
 
         def snap_to_ground(self):
             # Raycast vers le bas depuis une hauteur sûre (ex: Y=100)
@@ -30,7 +32,14 @@ class Player(Entity):
         camera.position = (0, 4, -10)   # Offset relatif : 4m au-dessus, 10m derrière le pivot
         camera.rotation = (15, 0, 0)    # Incline la caméra de 15° vers le bas
 
+    def get_actual_chunk(self):
+        return int(self.x // 100), int(self.z // 100)  # Retourne les coordonnées du chunk actuel
+    def get_chunk_nbr(self):
+        return self.get_actual_chunk()[1]%3
+
     def update(self):
+        if time.time() - self.creation_date < 1:  # Si l'entité a été créée il y a moins de 0.1 secondes
+            return  # Ne pas exécuter le reste de la mise à jour pour éviter les erreurs de collision
         # Raycast sous le joueur pour détecter la hauteur exacte du terrain déformé
         #hit_info = raycast(self.world_position + Vec3(0, 1, 0), Vec3(0, -1, 0), distance=3, ignore=(self,))
         
@@ -40,8 +49,14 @@ class Player(Entity):
         ray_hit = raycast(ray_origin, Vec3(0, -1, 0), distance=10, ignore=(self,))
         
         self.physics.apply_physics(self, ray_hit,held_keys)
-        
-        
+
+        for element in self.WM.chunks[self.get_chunk_nbr()].sapins:
+            if self.intersects(element).hit:
+                #element.color = color.lime
+                print('player is inside trigger box')
+        #if self.intersects(trigger_box).hit:
+        #    trigger_box.color = color.lime
+        #    print('player is inside trigger box')
         
         """# Déplacement
         direction = Vec3(

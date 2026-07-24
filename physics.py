@@ -15,7 +15,7 @@ class SkiPhysics:
 
         # Paramètres de la suspension (jambes)
         self.rest_height = 1.0       # Hauteur cible au-dessus du sol (mètres)
-        self.stiffness = 0.1       # Raideur du ressort (k) : plus élevé = plus ferme
+        self.stiffness = 0.05       # Raideur du ressort (k) : plus élevé = plus ferme
         self.damping = 1          # Amortissement (c) : évite le comportement "trampoline"
 
         # Attributs d'état exposés pour l'UI et la télémétrie

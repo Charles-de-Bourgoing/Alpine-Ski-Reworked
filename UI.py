@@ -12,7 +12,7 @@ class MenuManager:
 
     def show_loading_screen(self):
         destroy(self.play_button)
-        self.loading_screen = Entity(model='quad', texture='loading_image')
+        self.loading_screen = Entity(model='quad', texture='images/La-Parva-2-Fall-Line-Skiing-1024x683.jpg', scale=(16, 9), position=(0, 0, -1))
         thread.start_new_thread(function=self.load_level, args=())
         
     @staticmethod
@@ -36,7 +36,8 @@ class MenuManager:
         global level, P1, gun
         level = Level()
         P1 = Player()  # Le joueur est une entité indépendante
-        #gun = Entity(model='cube', parent=P1, position=(0.5, 0.25, 0.25), scale=(0.3, 0.2, 1), color=color.red)
+        
+        gun = Entity(model='cube', parent=P1, position=(0.5, -0.25, 0.25), scale=(0.3, 0.2, 1), color=color.red)
         WManager = WorldManager(P1)
         destroy(self.loading_screen)
         self.setup_gameplay_ui(P1.physics)  # Passer l'instance de SkiPhysics du joueur à la fonction UI

@@ -24,9 +24,11 @@ class SkiPhysics:
 
         #Pour le mode bâtons
         self.use_poles_mode = False
-        self.pole_push_force = 15.0  # Force d'impulsion des bâtons
-        self.pole_cooldown = 0.8     # Délai minimum entre deux coups de bâton (secondes)
-        self.last_pole_time = 0.0
+        self.pole_push_force = 40.0  # Force d'impulsion des bâtons
+        self.pole_duration = 0.4        # Durée de poussée active (s)
+        self.pole_cooldown = 0.6        # Intervalle total entre 2 coups (s)
+        self.pole_active_time = 0.0     # Compteur restant de poussée
+        self.pole_cooldown_timer = 0.0  # Compteur restant de recharge
 
     def apply_physics(self, player, ray_hit, keys):
         
@@ -68,12 +70,20 @@ class SkiPhysics:
                 right_on_slope = forward_on_slope.cross(normal).normalized()
                 
                 # Poussée des bâtons (si l'option est activée, au sol, et touche appuyée)
-                if self.use_poles_mode and keys['space']:
-                    current_time = time.time()
-                    if current_time - self.last_pole_time >= self.pole_cooldown:
-                        # Impulsion vers l'avant selon l'axe des skis
-                        self.velocity += forward_on_slope * self.pole_push_force * time.dt
-                        self.last_pole_time = current_time
+                # 1. Décrémentation des timers globaux (en dehors des conditions de touche)
+                if self.pole_active_time > 0:
+                    self.pole_active_time -= time.dt
+                if self.pole_cooldown_timer > 0:
+                    self.pole_cooldown_timer -= time.dt
+
+                # 2. Déclenchement d'un nouveau cycle (si espace appuyé, au sol, et hors cooldown/poussée)
+                if self.use_poles_mode and keys['space'] and self.pole_active_time <= 0 and self.pole_cooldown_timer <= 0:
+                    self.pole_active_time = self.pole_duration
+                    self.pole_cooldown_timer = self.pole_cooldown  # Durée totale du cycle (ex: 0.6s)
+
+                # 3. Application de la force (se termine naturellement même si espace est relâché)
+                if self.pole_active_time > 0:
+                    self.velocity += forward_on_slope * self.pole_push_force * time.dt
 
                 # 3. Projection de la pesanteur sur la pente
                 gravity_vec = Vec3(0, -self.gravity, 0)

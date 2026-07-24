@@ -5,7 +5,7 @@ class Player(Entity):
     def __init__(self, **kwargs):
         super().__init__(
             model='models/skier_low_poly_character',
-            scale=(0.8, 1.8, 0.5), # Proportion plus proche d'un skieur
+            scale=(1.2, 2.7, 0.75), # Proportion plus proche d'un skieur
             #texture='models/skier_low_poly_character',
             texture='models/gradient',
             origin_y=-0.5,
